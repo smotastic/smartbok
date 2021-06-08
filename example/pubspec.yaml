@@ -1,0 +1,15 @@
+name: examples
+description: Examples for smartbok
+# homepage: https://www.example.com
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+publish_to: none
+
+dependencies:
+  smartbok:
+    path: "../generator"
+
+dev_dependencies:
+  build_runner: ^2.0.4
+  pedantic: ^1.10.0
