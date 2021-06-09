@@ -9,3 +9,9 @@ class Copyable {
 
   Copyable(this.text, this.number);
 }
+
+extension CopyWitha on Copyable {
+  Copyable copyWith({String? text, num? number}) {
+    return Copyable(text ?? this.text, number ?? this.number);
+  }
+}

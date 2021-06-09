@@ -6,4 +6,8 @@ part of 'copyWith.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-// it works
+extension CopyableCopyWithExtension on Copyable {
+  Copyable $copyWith({String? text, num? number}) {
+    return Copyable();
+  }
+}

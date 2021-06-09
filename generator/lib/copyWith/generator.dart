@@ -15,7 +15,37 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           todo: 'Add CopyWith annotation to a class');
     }
 
+    final extension = Extension((b) => b //
+      ..name = '${element.displayName}CopyWithExtension'
+      ..on = refer(element.displayName)
+      ..methods.add(_generateCopyWith(element)));
+
     final emitter = DartEmitter();
-    return '// it works';
+    return '${extension.accept(emitter)}';
+  }
+
+  Method _generateCopyWith(ClassElement element) {
+    return Method((b) => b //
+      ..name = '\$copyWith' //
+      ..body = _generateBody(element)
+      ..optionalParameters
+          .addAll(element.fields.map((e) => _generateParameter(e)))
+      ..returns = refer(element.displayName));
+  }
+
+  Parameter _generateParameter(FieldElement e) {
+    return Parameter((b) => b
+      ..named = true
+      ..name = e.name
+      ..type = refer('${e.type.element!.displayName}?'));
+  }
+
+  Code _generateBody(ClassElement element) {
+    final blockBuilder = BlockBuilder();
+    // final output = Output(positionalArgs, {namedArgs});
+    Expression copyWithExpression =
+        refer(element.displayName).newInstance([]).returned;
+    blockBuilder.addExpression(copyWithExpression);
+    return blockBuilder.build();
   }
 }
