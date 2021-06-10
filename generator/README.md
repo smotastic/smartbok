@@ -4,7 +4,7 @@ Dart Annotation Processor for reducing boilerplate code.
 Heavily inspired by https://projectlombok.org/
 
 - [Installation](#installation)
-- [Annotations](#annotations)
+- [Usage](#usage)
 
 # Installation
 
@@ -24,7 +24,7 @@ flutter packages pub run build_runner build
 flutter packages pub run build_runner watch
 ```
 
-# Annotations
+# Usage
 
 ## CopyWith
 

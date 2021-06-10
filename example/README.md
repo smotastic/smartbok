@@ -1,1 +1,3 @@
-A simple command-line application.
+# Example
+
+Contains examples for the usage of smartbok
