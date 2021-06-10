@@ -1,5 +1,5 @@
 name: smartbok
-description: Dart Annotation Processor for reducing boilerplate code
+description: Dart Annotation Processor for automatically generating boilerplate code, such as copyWith Methods for Models
 version: 1.0.0
 # homepage: https://www.example.com
 
