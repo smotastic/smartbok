@@ -6,8 +6,8 @@ part of 'copyWith.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension CopyableCopyWithExtension on Copyable {
-  Copyable $copyWith({String? text, num? number}) {
-    return Copyable();
+extension ModelCopyWithExtension on Model {
+  Model $copyWith({String? text, num? number}) {
+    return Model(text ?? this.text, number: number ?? this.number);
   }
 }

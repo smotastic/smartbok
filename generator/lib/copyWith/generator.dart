@@ -43,9 +43,28 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   Code _generateBody(ClassElement element) {
     final blockBuilder = BlockBuilder();
     // final output = Output(positionalArgs, {namedArgs});
-    Expression copyWithExpression =
-        refer(element.displayName).newInstance([]).returned;
+    final constructor = _findDefaultConstructor(element);
+    final positionalArgs = <Expression>[];
+    final namedArgs = <String, Expression>{};
+    constructor.parameters.forEach((element) {
+      final expression = refer('${element.name} ?? this.${element.name}');
+      if (element.isNamed) {
+        namedArgs.putIfAbsent(element.name, () => expression);
+      } else {
+        // positional
+        positionalArgs.add(expression);
+      }
+    });
+    final copyWithExpression = refer(element.displayName)
+        .newInstance(positionalArgs, namedArgs)
+        .returned;
     blockBuilder.addExpression(copyWithExpression);
     return blockBuilder.build();
+  }
+
+  ConstructorElement _findDefaultConstructor(ClassElement outputClass) {
+    return outputClass.constructors
+        .where((element) => !element.isFactory)
+        .first;
   }
 }
