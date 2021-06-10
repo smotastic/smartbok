@@ -2,6 +2,7 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:smartbok/copyWith/annotations.dart';
+import 'package:smartbok/core/generator_helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
@@ -51,12 +52,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// The positional and named arguments of the default constructor are then set, by assigning them a ifThen Expression, using [_generateIfThenExpression].
   /// If there are any non final parameters, which are not present in the constructor, they'll be set after initializing the instance.
   Code _generateBody(ClassElement element) {
-    // final output = Output(positionalArgs, {namedArgs});
-    final constructor = _findDefaultConstructor(element);
     final usedParameters = <String>[];
     final positionalArgs = <Expression>[];
     final namedArgs = <String, Expression>{};
-    constructor.parameters.forEach((element) {
+
+    GenHelper.findDefaultConstructor(element).parameters.forEach((element) {
       final assignment = _generateIfThenExpression(element);
       if (element.isNamed) {
         namedArgs.putIfAbsent(element.name, () => assignment);
@@ -65,6 +65,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       }
       usedParameters.add(element.name);
     });
+
     final className = element.displayName.toLowerCase();
     final blockBuilder = BlockBuilder()
       ..addExpression(refer(element.displayName)
@@ -85,12 +86,5 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   Expression _generateIfThenExpression(Element element) {
     return refer('${element.name}').ifNullThen(refer('this.${element.name}'));
-  }
-
-  /// Finds the default constructor of a given [ClassElement]
-  ConstructorElement _findDefaultConstructor(ClassElement outputClass) {
-    return outputClass.constructors
-        .where((element) => !element.isFactory)
-        .first;
   }
 }
