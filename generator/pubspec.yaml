@@ -1,6 +1,7 @@
 name: smartbok
 description: Dart Annotation Processor for automatically generating boilerplate code, such as copyWith Methods for Models
 version: 1.0.0
+repository: https://github.com/smotastic/smartbok
 # homepage: https://www.example.com
 
 environment:
