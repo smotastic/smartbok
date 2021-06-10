@@ -6,7 +6,7 @@ import 'package:source_gen/source_gen.dart';
 
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   @override
-  generateForAnnotatedElement(
+  String generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
@@ -24,6 +24,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     return '${extension.accept(emitter)}';
   }
 
+  /// Generates the copyWith Method
   Method _generateCopyWith(ClassElement element) {
     return Method((b) => b //
       ..name = '\$copyWith' //
@@ -33,6 +34,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       ..returns = refer(element.displayName));
   }
 
+  /// Generates an optional method parameter for the copyWithMethod.
+  ///
+  /// The given [FieldElement] acts as the name, and the type of the resulting [Parameter].
+  /// The parameter is always named, and optional
   Parameter _generateParameter(FieldElement e) {
     return Parameter((b) => b
       ..named = true
@@ -40,28 +45,49 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       ..type = refer('${e.type.element!.displayName}?'));
   }
 
+  /// Generates the body for the copyWith Method.
+  ///
+  /// First creates a new instance of the current model.
+  /// The positional and named arguments of the default constructor are then set, by assigning them a ifThen Expression, using [_generateIfThenExpression].
+  /// If there are any non final parameters, which are not present in the constructor, they'll be set after initializing the instance.
   Code _generateBody(ClassElement element) {
-    final blockBuilder = BlockBuilder();
     // final output = Output(positionalArgs, {namedArgs});
     final constructor = _findDefaultConstructor(element);
+    final usedParameters = <String>[];
     final positionalArgs = <Expression>[];
     final namedArgs = <String, Expression>{};
     constructor.parameters.forEach((element) {
-      final expression = refer('${element.name} ?? this.${element.name}');
+      final assignment = _generateIfThenExpression(element);
       if (element.isNamed) {
-        namedArgs.putIfAbsent(element.name, () => expression);
+        namedArgs.putIfAbsent(element.name, () => assignment);
       } else {
-        // positional
-        positionalArgs.add(expression);
+        positionalArgs.add(assignment);
       }
+      usedParameters.add(element.name);
     });
-    final copyWithExpression = refer(element.displayName)
-        .newInstance(positionalArgs, namedArgs)
-        .returned;
-    blockBuilder.addExpression(copyWithExpression);
+    final className = element.displayName.toLowerCase();
+    final blockBuilder = BlockBuilder()
+      ..addExpression(refer(element.displayName)
+          .newInstance(positionalArgs, namedArgs)
+          .assignFinal(className));
+
+    element.fields
+        .where((element) => !element.isFinal)
+        .where((element) => !usedParameters.contains(element.name))
+        .map((e) => refer(className)
+            .property(e.name)
+            .assign(_generateIfThenExpression(e)))
+        .forEach((exp) => blockBuilder.addExpression(exp));
+
+    blockBuilder.addExpression(refer(className).returned);
     return blockBuilder.build();
   }
 
+  Expression _generateIfThenExpression(Element element) {
+    return refer('${element.name}').ifNullThen(refer('this.${element.name}'));
+  }
+
+  /// Finds the default constructor of a given [ClassElement]
   ConstructorElement _findDefaultConstructor(ClassElement outputClass) {
     return outputClass.constructors
         .where((element) => !element.isFactory)

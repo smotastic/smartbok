@@ -6,6 +6,8 @@ part 'copyWith.g.dart';
 class Model {
   final String text;
   final num number;
+  String? someText;
+  String? someConstructorText;
 
-  Model(this.text, {required this.number});
+  Model(this.text, this.someConstructorText, {required this.number});
 }

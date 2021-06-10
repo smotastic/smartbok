@@ -7,7 +7,15 @@ part of 'copyWith.dart';
 // **************************************************************************
 
 extension ModelCopyWithExtension on Model {
-  Model $copyWith({String? text, num? number}) {
-    return Model(text ?? this.text, number: number ?? this.number);
+  Model $copyWith(
+      {String? text,
+      num? number,
+      String? someText,
+      String? someConstructorText}) {
+    final model = Model(
+        text ?? this.text, someConstructorText ?? this.someConstructorText,
+        number: number ?? this.number);
+    model.someText = someText ?? this.someText;
+    return model;
   }
 }
